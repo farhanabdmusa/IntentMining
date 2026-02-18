@@ -3,7 +3,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 from ITER_DBSCAN import ITER_DBSCAN
-from sentenceEmbedding import getEmbeddings
+from sentenceEmbedding import SentenceEmbedding
 from sklearn.cluster import DBSCAN
 import hdbscan
 from tqdm import tqdm
@@ -45,7 +45,8 @@ class EvaluateDataset(object):
         :return:
         """
         data = self.df[self.text_column].values.tolist()
-        feature = getEmbeddings(data)
+        sentenceEmbedding = SentenceEmbedding()
+        feature = sentenceEmbedding.getEmbeddings(data)
         self.df['features'] = feature
 
     def run_iter_dbscan(self, df, dist, max_iter, min_sample):
