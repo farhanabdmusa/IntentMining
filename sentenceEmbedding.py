@@ -19,20 +19,19 @@ class SentenceEmbedding(object):
         question_embeddings = embedding.numpy().tolist()
         return question_embeddings
 
-obj = SentenceEmbedding()
-def getEmbeddings(data):
-    vector = []
-    start = 0
-    step = 10000
+    def getEmbeddings(self, data):
+        vector = []
+        start = 0
+        step = 10000
 
-    for i in range(int(len(data) / step)):
-        samples = data[start:start + step]
-        start += step
-        features = obj.embed(samples)
-        vector += features
+        for i in range(int(len(data) / step)):
+            samples = data[start:start + step]
+            start += step
+            features = self.embed(samples)
+            vector += features
 
-    if len(data) % step != 0:
-        samples = data[start:]
-        features = obj.embed(samples)
-        vector += features
-    return vector
+        if len(data) % step != 0:
+            samples = data[start:]
+            features = self.embed(samples)
+            vector += features
+        return vector
