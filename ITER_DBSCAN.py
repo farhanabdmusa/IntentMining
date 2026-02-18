@@ -59,7 +59,7 @@ class ITER_DBSCAN(DBSCAN):
 
         if type(data[0]) is str:
             #data = self.preprocess_data(data)
-            if self.features is not 'precomputed':
+            if self.features != 'precomputed':
                 embedding_model = SentenceEmbedding()
                 data = embedding_model.getEmbeddings(data)
 
