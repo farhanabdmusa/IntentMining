@@ -4,3 +4,4 @@ scikit-learn==1.0.1
 hdbscan==0.8.33
 pandas==1.1.4
 xlrd==1.2.0
+tqdm
