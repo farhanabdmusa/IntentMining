@@ -5,6 +5,7 @@ from sklearn.metrics import pairwise_distances
 from collections import Counter
 from sklearn.cluster import DBSCAN
 from sentenceEmbedding import SentenceEmbedding
+from IndobertEmbedding import IndobertEmbedding
 import re
 
 
@@ -24,10 +25,12 @@ class ITER_DBSCAN(DBSCAN):
                 will be discarded. (default: 300)
     :features: default values is None, the algorithm expects a list of short texts. In case the representation is
                 pre-computed for text or data sources (pass featyres values as "precomputed").
+    :algorithm: ITER-DBSCAN or IndoBERT
+    :metric: euclidean, precomputed, etc
     """
 
     def __init__(self, initial_distance=0.10, initial_minimum_samples=20, delta_distance=0.01, delta_minimum_samples=1,
-                 max_iteration=5, threshold=300, features=None
+                 max_iteration=5, threshold=300, features=None, algorithm="ITER-DBSCAN", metric="precomputed"
                  ):
 
         self.initial_distance = initial_distance
@@ -37,6 +40,8 @@ class ITER_DBSCAN(DBSCAN):
         self.max_iteration = max_iteration
         self.threshold = threshold
         self.features = features
+        self.algorithm = algorithm
+        self.metric = metric
         self.labels_ = None
 
     def preprocess_data(self, features):
@@ -60,8 +65,13 @@ class ITER_DBSCAN(DBSCAN):
         if type(data[0]) is str:
             #data = self.preprocess_data(data)
             if self.features != 'precomputed':
-                embedding_model = SentenceEmbedding()
-                data = embedding_model.getEmbeddings(data)
+                if self.algorithm == "ITER-DBSCAN":
+                    embedding_model = SentenceEmbedding()
+                    data = embedding_model.getEmbeddings(data)
+                elif self.algorithm == "IndoBERT":
+                    embedding_model = IndobertEmbedding()
+                    data = embedding_model.getEmbeddings(data)
+
 
         df = pd.DataFrame(index=range(len(data)), columns=['features', 'labels'])
         df['features'] = data
@@ -73,7 +83,7 @@ class ITER_DBSCAN(DBSCAN):
 
             if 5 > len(features): break
             cluster_labels = DBSCAN(eps=self.initial_distance, min_samples=self.initial_minimum_samples,
-                                    metric='precomputed')
+                                    metric=self.metric)
             labels = cluster_labels.fit_predict(distance_matrix)
             cluster_labels = [str(c) for c in labels]
             label_freq = Counter(cluster_labels)
