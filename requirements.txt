@@ -5,3 +5,4 @@ scikit-learn
 pandas
 xlrd
 tqdm
+google_play_scraper
