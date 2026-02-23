@@ -39,6 +39,82 @@ a factor of 0.01 and 1 respectively.
   Download ITER-DBSCAN package from Pypi repository.
   `pip install ShortTextClustering`
 
+# Project Installation Guide
+Follow these steps to set up your development environment using `venv` and install the required dependencies.
+
+**Prerequisites**
+- Python 3.11+ installed on your system.
+- Access to a Terminal or Command Prompt.
+
+**Install PyTorch (Device-Specific)**
+
+> [!IMPORTANT]
+> Check your hardware before installing PyTorch. The version in requirements.txt might not be optimized for your specific device.
+> For NVIDIA GPU (CUDA): Visit pytorch.org and copy the command for your specific CUDA version (e.g., `pip install torch --index-url https://download.pytorch.org/whl/cu118)`.
+
+
+> [!WARNING]
+> **Library Dependency & Hardware Optimization:** The `transformers` library is strictly dependent on the `torch` version. The specific version defined in `requirements.txt` is a baseline; if you have installed a hardware-optimized version of PyTorch (e.g., CUDA 12.1 or MPS), you should ensure your `transformers` version is compatible. If you encounter errors, try upgrading to the latest transformers version using `pip install --upgrade transformers`.
+
+### Installation Steps
+
+1. Clone the Repository
+If you have just downloaded this project:
+```Bash
+git clone <repository-url>
+cd <project-folder-name>
+```
+
+2. Create a Virtual Environment (`venv`)
+Run the following command to create a virtual environment. This ensures that the project's libraries do not conflict with your global Python installation.
+
+Windows:
+```Bash
+python -m venv venv
+```
+
+macOS / Linux:
+```Bash
+python3 -m venv venv
+```
+
+3. Activate the Virtual Environment
+Once created, you must activate it:
+
+Windows (Command Prompt):
+```DOS
+venv\Scripts\activate
+```
+
+Windows (PowerShell):
+```PowerShell
+.\venv\Scripts\Activate.ps1
+```
+
+macOS / Linux:
+```Bash
+source venv/bin/activate
+```
+
+Note: If successful, you will see (`venv`) appear at the beginning of your terminal prompt.
+
+
+4. Install Dependencies
+
+Use pip to install all libraries listed in the requirements.txt file:
+```Bash
+
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**How to Deactivate `venv`**
+
+If you are finished working, simply type:
+```Bash
+deactivate
+```
+
 # Sample Code
 # Load Packages
 
