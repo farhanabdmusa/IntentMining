@@ -19,7 +19,7 @@ class IndobertEmbedding:
         inputs = self.tokenizer(text, return_tensors="pt")
         with torch.no_grad():
             outputs = self.model(**inputs)
-        return outputs.last_hidden_state.mean(dim=1)
+        return outputs.last_hidden_state.mean(dim=1).numpy().tolist()
 
     def getEmbeddings(self, data):
         vector = []
