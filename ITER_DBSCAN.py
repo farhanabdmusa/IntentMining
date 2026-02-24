@@ -6,6 +6,7 @@ from collections import Counter
 from sklearn.cluster import DBSCAN
 from sentenceEmbedding import SentenceEmbedding
 from IndobertEmbedding import IndobertEmbedding
+from IndoSBERTEmbedding import IndoSBERTEmbedding
 import re
 
 
@@ -65,12 +66,17 @@ class ITER_DBSCAN(DBSCAN):
         if type(data[0]) is str:
             #data = self.preprocess_data(data)
             if self.features != 'precomputed':
+                print(f"Create vector embedding for {self.algorithm}...")
                 if self.algorithm == "ITER-DBSCAN":
                     embedding_model = SentenceEmbedding()
                     data = embedding_model.getEmbeddings(data)
                 elif self.algorithm == "IndoBERT":
                     embedding_model = IndobertEmbedding()
                     data = embedding_model.getEmbeddings(data)
+                elif self.algorithm == "IndoSBERT":
+                    embedding_model = IndoSBERTEmbedding()
+                    data = embedding_model.getEmbeddings(data)
+                print("Vector embedding created!")
 
 
         df = pd.DataFrame(index=range(len(data)), columns=['features', 'labels'])
@@ -79,10 +85,14 @@ class ITER_DBSCAN(DBSCAN):
         cluster_id = 0
         for i in range(self.max_iteration):
             features = np.array(df.loc[df.labels == -1]['features'].values.tolist())
-            distance_matrix = pairwise_distances(features, metric='cosine')
+            if self.metric == "precomputed":
+                distance_matrix = pairwise_distances(features, metric='cosine')
+            else :
+                distance_matrix = features
 
             if 5 > len(features): break
-            cluster_labels = DBSCAN(eps=self.initial_distance, min_samples=self.initial_minimum_samples,
+            cluster_labels = DBSCAN(eps=self.initial_distance, 
+                                    min_samples=self.initial_minimum_samples,
                                     metric=self.metric)
             labels = cluster_labels.fit_predict(distance_matrix)
             cluster_labels = [str(c) for c in labels]

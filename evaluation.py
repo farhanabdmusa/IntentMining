@@ -4,6 +4,8 @@ from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 from ITER_DBSCAN import ITER_DBSCAN
 from sentenceEmbedding import SentenceEmbedding
+from IndobertEmbedding import IndobertEmbedding
+from IndoSBERTEmbedding import IndoSBERTEmbedding
 from sklearn.cluster import DBSCAN
 import hdbscan
 from tqdm import tqdm
@@ -39,14 +41,23 @@ class EvaluateDataset(object):
         except:
             raise Exception("Failed to load file!!")
 
-    def extract_feature(self):
+    def extract_feature(self, algorithm):
         """
         extract feature representation of short text using Universenal sentence encoder
         :return:
         """
         data = self.df[self.text_column].values.tolist()
-        sentenceEmbedding = SentenceEmbedding()
-        feature = sentenceEmbedding.getEmbeddings(data)
+        if algorithm == "ITER-DBSCAN":
+            sentenceEmbedding = SentenceEmbedding()
+            feature = sentenceEmbedding.getEmbeddings(data)
+        elif algorithm == "IndoBERT":
+            embedding_model = IndobertEmbedding()
+            feature = embedding_model.getEmbeddings(data)
+        elif algorithm == "IndoSBERT":
+            embedding_model = IndoSBERTEmbedding()
+            feature = embedding_model.getEmbeddings(data)
+        else:
+            raise Exception("Invalid algorithm")
         self.df['features'] = feature
 
     def run_iter_dbscan(self, df, dist, max_iter, min_sample, algorithm, metric):
@@ -152,9 +163,9 @@ class EvaluateDataset(object):
 
     def run_iter(self, all_parameters, algorithm):
         self.load_data()
-        self.extract_feature()
         param_results = []
         for i in tqdm(range(len(all_parameters))):
+            self.extract_feature(all_parameters[i].get('algorithm', 'ITER-DBSCAN'))
             try:
                 start_time = time()
                 if algorithm == 'ITER_DBSCAN':
