@@ -9,7 +9,7 @@ class IndobertEmbedding:
 
     def loadModel(self):
         if self.model is None:
-            print("Loading HuggingFace model...")
+            print("Loading HuggingFace IndoBERT model...")
             model_name = "indobenchmark/indobert-base-p1"
             self.tokenizer = AutoTokenizer.from_pretrained(model_name)
             self.model = AutoModel.from_pretrained(model_name)

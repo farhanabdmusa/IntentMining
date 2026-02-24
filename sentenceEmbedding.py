@@ -9,7 +9,7 @@ class SentenceEmbedding(object):
 
     def loadModel(self):
         if self.model is None:
-            print('Loading Tensorflow model....')
+            print('Loading Tensorflow USE model....')
             model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
             self.model = hub.load(model_url)
             print('Model Loaded.')

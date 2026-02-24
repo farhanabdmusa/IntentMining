@@ -41,26 +41,26 @@ class EvaluateDataset(object):
         except:
             raise Exception("Failed to load file!!")
 
-    def extract_feature(self, algorithm):
+    def extract_feature(self, embedding_model):
         """
         extract feature representation of short text using Universenal sentence encoder
         :return:
         """
         data = self.df[self.text_column].values.tolist()
-        if algorithm == "ITER-DBSCAN":
+        if embedding_model == "ITER-DBSCAN":
             sentenceEmbedding = SentenceEmbedding()
             feature = sentenceEmbedding.getEmbeddings(data)
-        elif algorithm == "IndoBERT":
+        elif embedding_model == "IndoBERT":
             embedding_model = IndobertEmbedding()
             feature = embedding_model.getEmbeddings(data)
-        elif algorithm == "IndoSBERT":
+        elif embedding_model == "IndoSBERT":
             embedding_model = IndoSBERTEmbedding()
             feature = embedding_model.getEmbeddings(data)
         else:
-            raise Exception("Invalid algorithm")
+            raise Exception("Invalid embedding_model")
         self.df['features'] = feature
 
-    def run_iter_dbscan(self, df, dist, max_iter, min_sample, algorithm, metric):
+    def run_iter_dbscan(self, df, dist, max_iter, min_sample, embedding_model, metric):
         """
         run iter-dbscan algorithm - computes cluster labels for short text
         :param df: loaded dataframe
@@ -72,7 +72,7 @@ class EvaluateDataset(object):
         clustering_model = ITER_DBSCAN(initial_distance=dist, initial_minimum_samples=min_sample,
                                        max_iteration=max_iter,
                                        features='precomputed',
-                                       algorithm=algorithm, 
+                                       embedding_model=embedding_model, 
                                        metric=metric)
         cluster_labels = clustering_model.fit_predict(df['features'].values.tolist())
         cluster_labels = ['None' if c == -1 else c for c in cluster_labels]
@@ -165,14 +165,14 @@ class EvaluateDataset(object):
         self.load_data()
         param_results = []
         for i in tqdm(range(len(all_parameters))):
-            self.extract_feature(all_parameters[i].get('algorithm', 'ITER-DBSCAN'))
+            self.extract_feature(all_parameters[i].get('embedding_model', 'ITER-DBSCAN'))
             try:
                 start_time = time()
                 if algorithm == 'ITER_DBSCAN':
                     self.run_iter_dbscan(self.df, dist=all_parameters[i]['distance'],
                                          max_iter=all_parameters[i]['max_iteration'],
                                          min_sample=all_parameters[i]['minimum_samples'],
-                                         algorithm=all_parameters[i].get('algorithm', 'ITER-DBSCAN'),
+                                         embedding_model=all_parameters[i].get('embedding_model', 'ITER-DBSCAN'),
                                          metric=all_parameters[i].get('metric', 'precomputed')
                                          )
                 elif algorithm == 'DBSCAN':

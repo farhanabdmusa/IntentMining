@@ -26,12 +26,12 @@ class ITER_DBSCAN(DBSCAN):
                 will be discarded. (default: 300)
     :features: default values is None, the algorithm expects a list of short texts. In case the representation is
                 pre-computed for text or data sources (pass featyres values as "precomputed").
-    :algorithm: ITER-DBSCAN or IndoBERT
+    :embedding_model: ITER-DBSCAN or IndoBERT
     :metric: euclidean, precomputed, etc
     """
 
     def __init__(self, initial_distance=0.10, initial_minimum_samples=20, delta_distance=0.01, delta_minimum_samples=1,
-                 max_iteration=5, threshold=300, features=None, algorithm="ITER-DBSCAN", metric="precomputed"
+                 max_iteration=5, threshold=300, features=None, embedding_model="ITER-DBSCAN", metric="precomputed"
                  ):
 
         self.initial_distance = initial_distance
@@ -41,7 +41,7 @@ class ITER_DBSCAN(DBSCAN):
         self.max_iteration = max_iteration
         self.threshold = threshold
         self.features = features
-        self.algorithm = algorithm
+        self.embedding_model = embedding_model
         self.metric = metric
         self.labels_ = None
 
@@ -66,14 +66,14 @@ class ITER_DBSCAN(DBSCAN):
         if type(data[0]) is str:
             #data = self.preprocess_data(data)
             if self.features != 'precomputed':
-                print(f"Create vector embedding for {self.algorithm}...")
-                if self.algorithm == "ITER-DBSCAN":
+                print(f"Create vector embedding for {self.embedding_model}...")
+                if self.embedding_model == "ITER-DBSCAN":
                     embedding_model = SentenceEmbedding()
                     data = embedding_model.getEmbeddings(data)
-                elif self.algorithm == "IndoBERT":
+                elif self.embedding_model == "IndoBERT":
                     embedding_model = IndobertEmbedding()
                     data = embedding_model.getEmbeddings(data)
-                elif self.algorithm == "IndoSBERT":
+                elif self.embedding_model == "IndoSBERT":
                     embedding_model = IndoSBERTEmbedding()
                     data = embedding_model.getEmbeddings(data)
                 print("Vector embedding created!")

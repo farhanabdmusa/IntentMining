@@ -8,7 +8,7 @@ class IndoSBERTEmbedding():
 
     def loadModel(self):
         if self.model is None:
-            print('Loading Huggingface model....')
+            print('Loading Huggingface IndoSBERT model....')
             self.model = SentenceTransformer('denaya/indoSBERT-large')
             print('Model Loaded.')
 
