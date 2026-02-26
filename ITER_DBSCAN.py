@@ -76,6 +76,8 @@ class ITER_DBSCAN(DBSCAN):
                 elif self.embedding_model == "IndoSBERT":
                     embedding_model = IndoSBERTEmbedding()
                     data = embedding_model.getEmbeddings(data)
+                else:
+                    raise Exception("Invalid embedding_model")
                 print("Vector embedding created!")
 
 
@@ -84,6 +86,9 @@ class ITER_DBSCAN(DBSCAN):
         df['labels'] = [-1] * len(data)
         cluster_id = 0
         for i in range(self.max_iteration):
+            # print(f"iterasi ke-{i}")
+            # print(f"initial_distance: {self.initial_distance}")
+            # print(f"initial_minimum_samples: {self.initial_minimum_samples}")
             features = np.array(df.loc[df.labels == -1]['features'].values.tolist())
             if self.metric == "precomputed":
                 distance_matrix = pairwise_distances(features, metric='cosine')
@@ -96,12 +101,16 @@ class ITER_DBSCAN(DBSCAN):
                                     metric=self.metric)
             labels = cluster_labels.fit_predict(distance_matrix)
             cluster_labels = [str(c) for c in labels]
+            # print(f"cluster_labels:\n{cluster_labels}")
             label_freq = Counter(cluster_labels)
+            # print(f"label_freq:\n{label_freq}")
             label_set = cluster_labels
             new_label_set = [-1 if label_freq[l] > self.threshold or l == '-1' else int(l) + cluster_id for l in
                              label_set]
+            # print(f"new_label_set:\n{new_label_set}")
 
             cluster_values = [k for k in new_label_set if k != -1]
+            # print(f"cluster_values:\n{cluster_values}")
 
             if len(cluster_values) > 0:
                 min_cluster_id = min(cluster_id, min(cluster_values))
@@ -110,16 +119,22 @@ class ITER_DBSCAN(DBSCAN):
             max_cluster_id = min_cluster_id + len(list(set(cluster_values)))
 
             unique_cluster_ids = list(set(cluster_values))
+            # print(f"unique_cluster_ids:\n{unique_cluster_ids}")
             id_mapper = dict()
             for i in range(len(unique_cluster_ids)):
                 id_mapper[unique_cluster_ids[i]] = min_cluster_id
                 min_cluster_id += 1
 
+            # print(f"id_mapper:\n{id_mapper}")
+
             new_label_set = [-1 if l == -1 else id_mapper[l] for l in new_label_set]
+            # print(f"new_label_set:\n{new_label_set}")
             cluster_id = max_cluster_id
+            # print(f"cluster_id:\n{cluster_id}")
             df.loc[df['labels'] == -1, 'labels'] = new_label_set
             self.initial_distance += self.delta_distance
             self.initial_minimum_samples -= self.delta_minimum_samples
+            # print("="*10)
 
             if self.initial_minimum_samples == 2:
                 break

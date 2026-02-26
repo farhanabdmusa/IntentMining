@@ -108,6 +108,7 @@ class EvaluateDataset(object):
     def generate_labels(self):
         """calculate cluster purity
         """
+        # print("======= START GENERATE_LABELS =======")
         self.df['representative_label'] = ['None'] * len(self.df)
         total = 0
         noise_count = 0
@@ -116,7 +117,9 @@ class EvaluateDataset(object):
             if cluster_id == 'None': continue
             from collections import Counter
             tmp_df = self.df.loc[self.df.cluster_ids == cluster_id][self.target_column].values.tolist()
+            # print(f"tmp_df:\n{tmp_df}")
             counts = Counter(tmp_df)
+            # print(f"counts:\n{counts}")
             intent = None
             cur_value = 0
             for key, value in counts.items():
@@ -125,13 +128,17 @@ class EvaluateDataset(object):
                     intent = key
             if len(tmp_df) == 0: continue
             purity = round(cur_value / len(tmp_df), 2)
+            # print(f"purity:\n{purity}")
             purities.append(purity)
+            # print(f"purities:\n{purities}")
             total += purity
+            # print(f"total:\n{total}")
             if purity >= 0.5:
                 self.df.loc[self.df.cluster_ids == cluster_id, 'representative_label'] = intent
             else:
                 noise_count += 1
-
+            # print(f"noise_count:\n{noise_count}")
+        # print("======= END GENERATE_LABELS =======")
         return noise_count
 
     """Propagating labels to the nearby points
@@ -142,18 +149,27 @@ class EvaluateDataset(object):
         """
         from sklearn.preprocessing import LabelEncoder
         from sklearn.linear_model import LogisticRegression
+        # print("======= START Label propagation =======")
         X = np.array(self.df.loc[self.df.representative_label != 'None']['features'].values.tolist())
+        # print(f"X:\n{X}")
+        # print(f"representative_label:\n{self.df['representative_label'].value_counts()}")
         labels = self.df.loc[self.df.representative_label != 'None']['representative_label'].values.tolist()
+        # print(f"labels:\n{labels}")
         le = LabelEncoder()
         y = le.fit_transform(labels)
+        # print(f"y:\n{y}")
         # print('Feature matrix shape: ', X.shape)
         # print('Target matrix shape: ', y.shape)
         clf = LogisticRegression(class_weight='balanced', C=0.8, solver='newton-cg')
         clf.fit(X, y)
         feat = np.array(self.df['features'].values.tolist())
         y_pred = clf.predict(feat)
+        # print(f"y_pred:\n{y_pred}")
+        # print(f"le.classes_:\n{le.classes_}")
         labels = [le.classes_[i] for i in y_pred]
+        # print(f"labels-2:\n{labels}")
         self.df['predictedIntent'] = labels
+        # print("======= END Label propagation =======")
 
     def evaulate_iter_dbscan(self, all_parameters):
         return self.run_iter(all_parameters, 'ITER_DBSCAN')
@@ -191,10 +207,15 @@ class EvaluateDataset(object):
                     continue
 
                 self.label_propagation()
+                # print(f"cluster_ids:\n{self.df.cluster_ids.value_counts()}")
                 per_labelled = round(len(self.df.loc[self.df.cluster_ids != 'None']) / len(self.df) * 100, 2)
+                # print(f"per_labelled:\n{per_labelled}")
                 num_clusters = len(list(set(self.df.loc[self.df.cluster_ids != 'None']['cluster_ids'].values.tolist())))
+                # print(f"num_clusters:\n{num_clusters}")
                 true_intent = self.df[self.target_column].values.tolist()
+                # print(f"true_intent:\n{true_intent}")
                 predicted_intent = self.df['predictedIntent'].values.tolist()
+                # print(f"predicted_intent:\n{predicted_intent}")
                 h_score = round(metrics.homogeneity_score(true_intent, predicted_intent), 2)
                 c_score = round(metrics.completeness_score(true_intent, predicted_intent), 2)
                 nmf = round(metrics.normalized_mutual_info_score(true_intent, predicted_intent), 2)
