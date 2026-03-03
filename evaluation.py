@@ -228,6 +228,9 @@ class EvaluateDataset(object):
 
                 true = le.transform(self.df[self.target_column].values.tolist())
                 pred = le.transform(self.df['predictedIntent'].values.tolist())
+                silhouette = metrics.silhouette_score(self.df["features"].values.tolist(), pred)
+                davies_bouldin = metrics.davies_bouldin_score(self.df["features"].values.tolist(), pred)
+                calinski = metrics.calinski_harabasz_score(self.df["features"].values.tolist(), pred)
                 accuracy = metrics.accuracy_score(true, pred)
                 precision = metrics.precision_score(true, pred, average='weighted')
                 recall = metrics.recall_score(true, pred, average='weighted')
@@ -243,6 +246,9 @@ class EvaluateDataset(object):
                 param['normalized_mutual_info_score'] = nmf
                 param['adjusted_mutual_info_score'] = amf
                 param['adjusted_rand_score'] = ars
+                param['silhouette_score'] = round(silhouette, 3)
+                param['davies_bouldin'] = round(davies_bouldin, 3)
+                param['calinski_harabasz'] = round(calinski, 3)
                 param['accuracy'] = round(accuracy, 3) * 100.0
                 param['precision'] = round(precision, 3) * 100.0
                 param['recall'] = round(recall, 3) * 100.0
