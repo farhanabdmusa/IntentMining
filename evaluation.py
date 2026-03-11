@@ -60,7 +60,8 @@ class EvaluateDataset(object):
             raise Exception("Invalid embedding_model")
         self.df['features'] = feature
 
-    def run_iter_dbscan(self, df, dist, max_iter, min_sample, embedding_model, metric):
+    def run_iter_dbscan(self, df, initial_distance=0.10, initial_minimum_samples=20, delta_distance=0.01, delta_minimum_samples=1,
+                 max_iteration=5, threshold=300, embedding_model="ITER-DBSCAN", metric="precomputed",):
         """
         run iter-dbscan algorithm - computes cluster labels for short text
         :param df: loaded dataframe
@@ -69,11 +70,17 @@ class EvaluateDataset(object):
         :param min_sample: iter-dbscan parameter minimum samples
         :return:
         """
-        clustering_model = ITER_DBSCAN(initial_distance=dist, initial_minimum_samples=min_sample,
-                                       max_iteration=max_iter,
-                                       features='precomputed',
-                                       embedding_model=embedding_model, 
-                                       metric=metric)
+        clustering_model = ITER_DBSCAN(
+            initial_distance=initial_distance, 
+            initial_minimum_samples=initial_minimum_samples,
+            max_iteration=max_iteration,
+            delta_distance=delta_distance,
+            delta_minimum_samples=delta_minimum_samples,
+            threshold=threshold,
+            features='precomputed',
+            embedding_model=embedding_model, 
+            metric=metric
+        )
         cluster_labels = clustering_model.fit_predict(df['features'].values.tolist())
         cluster_labels = ['None' if c == -1 else c for c in cluster_labels]
         self.df['cluster_ids'] = cluster_labels
@@ -185,12 +192,17 @@ class EvaluateDataset(object):
             try:
                 start_time = time()
                 if algorithm == 'ITER_DBSCAN':
-                    self.run_iter_dbscan(self.df, dist=all_parameters[i]['distance'],
-                                         max_iter=all_parameters[i]['max_iteration'],
-                                         min_sample=all_parameters[i]['minimum_samples'],
-                                         embedding_model=all_parameters[i].get('embedding_model', 'ITER-DBSCAN'),
-                                         metric=all_parameters[i].get('metric', 'precomputed')
-                                         )
+                    self.run_iter_dbscan(
+                        df=self.df, 
+                        initial_distance=all_parameters[i].get('initial_distance', 0.1),
+                        max_iteration=all_parameters[i].get('max_iteration', 5),
+                        initial_minimum_samples=all_parameters[i].get('initial_minimum_samples', 20),
+                        delta_distance=all_parameters[i].get('delta_distance', 0.01),
+                        delta_minimum_samples=all_parameters[i].get('delta_minimum_samples', 1),
+                        embedding_model=all_parameters[i].get('embedding_model', "ITER-DBSCAN"),
+                        metric=all_parameters[i].get('metric', 'precomputed'),
+                        threshold=all_parameters[i].get('threshold',300),
+                    )
                 elif algorithm == 'DBSCAN':
                     self.run_dbscan(self.df, min_distance=all_parameters[i]['min_distance'],
                                     minimum_samples=all_parameters[i]['minimum_samples'])
